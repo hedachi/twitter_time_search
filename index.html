@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Twitter 時間指定検索ツール</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background-color: white;
+      border-radius: 5px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input[type="datetime-local"] {
+      width: 100%;
+      padding: 5px;
+      margin-bottom: 15px;
+    }
+
+    button {
+      background-color: #1da1f2;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    .result {
+      margin-top: 20px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  </style>
+  <script>
+    function generateSearchString() {
+      const sinceInput = document.getElementById('since');
+      const untilInput = document.getElementById('until');
+      const resultDiv = document.getElementById('result');
+      const sinceDate = new Date(sinceInput.value);
+      const untilDate = new Date(untilInput.value);
+
+      if (isNaN(sinceDate.getTime()) || isNaN(untilDate.getTime())) {
+        resultDiv.textContent = '有効な日時を入力してください。';
+        return;
+      }
+
+      const sinceString = formatDateTime(sinceDate) + '_JST';
+      const untilString = formatDateTime(untilDate) + '_JST';
+
+      const searchString = `ChatGPT since:${sinceString} until:${untilString}`;
+      resultDiv.textContent = searchString;
+    }
+
+    function getLastHourSearchString() {
+      const now = new Date();
+      const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+      setDateTimeInputs(oneHourAgo, now);
+      generateSearchString();
+    }
+
+    function getLastThreeHoursSearchString() {
+      const now = new Date();
+      const threeHoursAgo = new Date(now.getTime() - 3 * 60 * 60 * 1000);
+      setDateTimeInputs(threeHoursAgo, now);
+      generateSearchString();
+    }
+
+    function setDateTimeInputs(since, until) {
+      document.getElementById('since').value = formatDateTimeInputValue(since);
+      document.getElementById('until').value = formatDateTimeInputValue(until);
+    }
+
+    function formatDateTime(date) {
+      const dateString = formatDate(date);
+      const timeString = formatTime(date);
+      return `${dateString}_${timeString}`;
+    }
+
+    function formatDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatTime(date) {
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      return `${hours}:${minutes}:${seconds}`;
+    }
+
+    function formatDateTimeInputValue(date) {
+      const dateString = formatDate(date);
+      const timeString = formatTime(date);
+      return `${dateString}T${timeString}`;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      getLastHourSearchString();
+    });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Twitter 時間指定検索ツール</h1>
+    <label for="since">開始日時を選択してください:</label>
+    <input type="datetime-local" id="since">
+    <label for="until">終了日時を選択してください:</label>
+    <input type="datetime-local" id="until">
+    <button onclick="generateSearchString()">検索文字列を生成</button>
+    <button onclick="getLastThreeHoursSearchString()">過去3時間の検索文字列を表示</button>
+    <div id="result" class="result"></div>
+  </div>
+</body>
+</html>
