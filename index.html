@@ -32,7 +32,7 @@
       margin-bottom: 5px;
     }
 
-    input[type="datetime-local"] {
+    input[type="text"], input[type="datetime-local"] {
       width: 100%;
       padding: 5px;
       margin-bottom: 15px;
@@ -56,35 +56,30 @@
   </style>
   <script>
     function generateSearchString() {
+      const keywordInput = document.getElementById('keyword');
       const sinceInput = document.getElementById('since');
       const untilInput = document.getElementById('until');
       const resultDiv = document.getElementById('result');
+      const keyword = keywordInput.value;
       const sinceDate = new Date(sinceInput.value);
       const untilDate = new Date(untilInput.value);
 
-      if (isNaN(sinceDate.getTime()) || isNaN(untilDate.getTime())) {
-        resultDiv.textContent = '有効な日時を入力してください。';
+      if (keyword.trim() === '' || isNaN(sinceDate.getTime()) || isNaN(untilDate.getTime())) {
+        resultDiv.textContent = '有効な検索ワードと日時を入力してください。';
         return;
       }
 
       const sinceString = formatDateTime(sinceDate) + '_JST';
       const untilString = formatDateTime(untilDate) + '_JST';
 
-      const searchString = `ChatGPT since:${sinceString} until:${untilString}`;
+      const searchString = `${keyword} since:${sinceString} until:${untilString}`;
       resultDiv.textContent = searchString;
     }
 
-    function getLastHourSearchString() {
+    function getSearchStringForDuration(durationInMinutes) {
       const now = new Date();
-      const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-      setDateTimeInputs(oneHourAgo, now);
-      generateSearchString();
-    }
-
-    function getLastThreeHoursSearchString() {
-      const now = new Date();
-      const threeHoursAgo = new Date(now.getTime() - 3 * 60 * 60 * 1000);
-      setDateTimeInputs(threeHoursAgo, now);
+      const durationDate = new Date(now.getTime() - durationInMinutes * 60 * 1000);
+      setDateTimeInputs(durationDate, now);
       generateSearchString();
     }
 
@@ -119,21 +114,40 @@
       return `${dateString}T${timeString}`;
     }
 
+    function copySearchString() {
+      const resultDiv = document.getElementById('result');
+      const textArea = document.createElement('textarea');
+      textArea.value = resultDiv.textContent;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-      getLastHourSearchString();
+      getSearchStringForDuration(60);
     });
   </script>
 </head>
 <body>
   <div class="container">
     <h1>Twitter 時間指定検索ツール</h1>
+    <label for="keyword">検索ワードを入力してください:</label>
+    <input type="text" id="keyword" value="ChatGPT">
     <label for="since">開始日時を選択してください:</label>
     <input type="datetime-local" id="since">
     <label for="until">終了日時を選択してください:</label>
     <input type="datetime-local" id="until">
     <button onclick="generateSearchString()">検索文字列を生成</button>
-    <button onclick="getLastThreeHoursSearchString()">過去3時間の検索文字列を表示</button>
+    <button onclick="getSearchStringForDuration(15)">過去15分</button>
+    <button onclick="getSearchStringForDuration(30)">過去30分</button>
+    <button onclick="getSearchStringForDuration(60)">過去1時間</button>
+    <button onclick="getSearchStringForDuration(180)">過去3時間</button>
+    <button onclick="getSearchStringForDuration(360)">過去6時間</button>
+    <button onclick="getSearchStringForDuration(720)">過去12時間</button>
+    <button onclick="getSearchStringForDuration(1440)">過去24時間</button>
     <div id="result" class="result"></div>
+    <button onclick="copySearchString()">コピー</button>
   </div>
 </body>
 </html>
