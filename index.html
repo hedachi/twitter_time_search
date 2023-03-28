@@ -47,40 +47,35 @@
       cursor: pointer;
       margin-right: 10px;
     }
-
-    .result {
-      margin-top: 20px;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-    }
   </style>
   <script>
-    function generateSearchString() {
+    function redirectToSearchResult() {
       const keywordInput = document.getElementById('keyword');
       const sinceInput = document.getElementById('since');
       const untilInput = document.getElementById('until');
-      const resultDiv = document.getElementById('result');
       const keyword = keywordInput.value;
       const sinceDate = new Date(sinceInput.value);
       const untilDate = new Date(untilInput.value);
 
       if (keyword.trim() === '' || isNaN(sinceDate.getTime()) || isNaN(untilDate.getTime())) {
-        resultDiv.textContent = '有効な検索ワードと日時を入力してください。';
+        alert('有効な検索ワードと日時を入力してください。');
         return;
       }
 
       const sinceString = formatDateTime(sinceDate) + '_JST';
       const untilString = formatDateTime(untilDate) + '_JST';
-
       const searchString = `${keyword} since:${sinceString} until:${untilString}`;
-      resultDiv.textContent = searchString;
+      const encodedSearchString = encodeURIComponent(searchString);
+      const searchURL = `https://twitter.com/search?q=${encodedSearchString}&src=typed_query`;
+
+      window.location.href = searchURL;
     }
 
-    function getSearchStringForDuration(durationInMinutes) {
+    function redirectToSearchResultForDuration(durationInMinutes) {
       const now = new Date();
       const durationDate = new Date(now.getTime() - durationInMinutes * 60 * 1000);
       setDateTimeInputs(durationDate, now);
-      generateSearchString();
+      redirectToSearchResult();
     }
 
     function setDateTimeInputs(since, until) {
@@ -100,8 +95,7 @@
       const day = String(date.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     }
-
-    function formatTime(date) {
+        function formatTime(date) {
       const hours = String(date.getHours()).padStart(2, '0');
       const minutes = String(date.getMinutes()).padStart(2, '0');
       const seconds = String(date.getSeconds()).padStart(2, '0');
@@ -114,18 +108,8 @@
       return `${dateString}T${timeString}`;
     }
 
-    function copySearchString() {
-      const resultDiv = document.getElementById('result');
-      const textArea = document.createElement('textarea');
-      textArea.value = resultDiv.textContent;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
-      getSearchStringForDuration(60);
+      redirectToSearchResultForDuration(60);
     });
   </script>
 </head>
@@ -138,16 +122,16 @@
     <input type="datetime-local" id="since">
     <label for="until">終了日時を選択してください:</label>
     <input type="datetime-local" id="until">
-    <button onclick="generateSearchString()">検索文字列を生成</button>
-    <button onclick="getSearchStringForDuration(15)">過去15分</button>
-    <button onclick="getSearchStringForDuration(30)">過去30分</button>
-    <button onclick="getSearchStringForDuration(60)">過去1時間</button>
-    <button onclick="getSearchStringForDuration(180)">過去3時間</button>
-    <button onclick="getSearchStringForDuration(360)">過去6時間</button>
-    <button onclick="getSearchStringForDuration(720)">過去12時間</button>
-    <button onclick="getSearchStringForDuration(1440)">過去24時間</button>
-    <div id="result" class="result"></div>
-    <button onclick="copySearchString()">コピー</button>
+    <button onclick="redirectToSearchResult()">検索結果画面へ</button>
+    <button onclick="redirectToSearchResultForDuration(15)">過去15分</button>
+    <button onclick="redirectToSearchResultForDuration(30)">過去30分</button>
+    <button onclick="redirectToSearchResultForDuration(60)">過去1時間</button>
+    <button onclick="redirectToSearchResultForDuration(180)">過去3時間</button>
+    <button onclick="redirectToSearchResultForDuration(360)">過去6時間</button>
+    <button onclick="redirectToSearchResultForDuration(720)">過去12時間</button>
+    <button onclick="redirectToSearchResultForDuration(1440)">過去24時間</button>
   </div>
 </body>
 </html>
+
+   
