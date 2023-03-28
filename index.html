@@ -95,7 +95,8 @@
       const day = String(date.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     }
-        function formatTime(date) {
+
+    function formatTime(date) {
       const hours = String(date.getHours()).padStart(2, '0');
       const minutes = String(date.getMinutes()).padStart(2, '0');
       const seconds = String(date.getSeconds()).padStart(2, '0');
@@ -109,9 +110,12 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      redirectToSearchResultForDuration(60);
+      const now = new Date();
+      const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+      setDateTimeInputs(oneHourAgo, now);
     });
   </script>
+
 </head>
 <body>
   <div class="container">
