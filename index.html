@@ -113,9 +113,17 @@
       const now = new Date();
       const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
       setDateTimeInputs(oneHourAgo, now);
+
+      const savedKeyword = localStorage.getItem('savedKeyword');
+      if (savedKeyword) {
+        document.getElementById('keyword').value = savedKeyword;
+      }
+
+      document.getElementById('keyword').addEventListener('input', (event) => {
+        localStorage.setItem('savedKeyword', event.target.value);
+      });
     });
   </script>
-
 </head>
 <body>
   <div class="container">
@@ -137,5 +145,3 @@
   </div>
 </body>
 </html>
-
-   
