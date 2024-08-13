@@ -11,8 +11,9 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
       margin: 0;
+      padding: 20px;
     }
 
     .container {
@@ -20,6 +21,8 @@
       border-radius: 5px;
       padding: 20px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      width: 100%;
     }
 
     h1 {
@@ -36,6 +39,7 @@
       width: 100%;
       padding: 5px;
       margin-bottom: 15px;
+      box-sizing: border-box;
     }
 
     button {
@@ -46,9 +50,39 @@
       border-radius: 3px;
       cursor: pointer;
       margin-right: 10px;
+      margin-bottom: 10px;
+    }
+
+    .search-history {
+      margin-top: 20px;
+    }
+
+    .search-history h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .search-history ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .search-history li {
+      margin-bottom: 5px;
+    }
+
+    .search-history a {
+      color: #1da1f2;
+      text-decoration: none;
+    }
+
+    .search-history a:hover {
+      text-decoration: underline;
     }
   </style>
   <script>
+    let searchHistory = [];
+
     function redirectToSearchResult() {
       const keywordInput = document.getElementById('keyword');
       const sinceInput = document.getElementById('since');
@@ -68,6 +102,7 @@
       const encodedSearchString = encodeURIComponent(searchString);
       const searchURL = `https://twitter.com/search?q=${encodedSearchString}&src=typed_query`;
 
+      addToSearchHistory(keyword);
       window.location.href = searchURL;
     }
 
@@ -109,6 +144,34 @@
       return `${dateString}T${timeString}`;
     }
 
+    function addToSearchHistory(keyword) {
+      if (!searchHistory.includes(keyword)) {
+        searchHistory.unshift(keyword);
+        if (searchHistory.length > 20) {
+          searchHistory.pop();
+        }
+        localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+        updateSearchHistoryDisplay();
+      }
+    }
+
+    function updateSearchHistoryDisplay() {
+      const historyList = document.getElementById('searchHistoryList');
+      historyList.innerHTML = '';
+      searchHistory.forEach(keyword => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = '#';
+        a.textContent = keyword;
+        a.onclick = function(e) {
+          e.preventDefault();
+          document.getElementById('keyword').value = keyword;
+        };
+        li.appendChild(a);
+        historyList.appendChild(li);
+      });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const now = new Date();
       const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
@@ -122,6 +185,12 @@
       document.getElementById('keyword').addEventListener('input', (event) => {
         localStorage.setItem('savedKeyword', event.target.value);
       });
+
+      const savedHistory = localStorage.getItem('searchHistory');
+      if (savedHistory) {
+        searchHistory = JSON.parse(savedHistory);
+        updateSearchHistoryDisplay();
+      }
     });
   </script>
 </head>
@@ -142,6 +211,11 @@
     <button onclick="redirectToSearchResultForDuration(360)">過去6時間</button>
     <button onclick="redirectToSearchResultForDuration(720)">過去12時間</button>
     <button onclick="redirectToSearchResultForDuration(1440)">過去24時間</button>
+    
+    <div class="search-history">
+      <h2>過去の検索ワード</h2>
+      <ul id="searchHistoryList"></ul>
+    </div>
   </div>
 </body>
 </html>
